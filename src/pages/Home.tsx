@@ -75,7 +75,7 @@ export default function Home() {
 
 
   return (
-    <div className="relative min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-100 to-gray-300 overflow-hidden">
+    <div className="relative min-h-screen flex justify-center items-center bg-gradient-to-br from-blue-100 to-gray-300 overflow-hidden px-4 sm:px-6">
       {/* Floating symbols */}
       {symbols.map(({ symbol, style }, idx) => (
         <FloatingSymbol key={idx} symbol={symbol} style={style} />
@@ -84,31 +84,31 @@ export default function Home() {
       {/* Content Box */}
       <div
         className="
-      relative
-      bg-gradient-to-r from-blue-300 to-gray-400
-      rounded-3xl
-      p-10
-      max-w-xl
-      w-full
-      text-center
-      shadow-lg
-      ring-4 ring-blue-400
-      transition
-      duration-700
-      ease-in-out
-      hover:shadow-[0_0_60px_20px_rgba(96,165,250,0.7)]
-      z-10
-    "
+        relative
+        bg-gradient-to-r from-blue-300 to-gray-400
+        rounded-3xl
+        p-6 sm:p-10
+        max-w-xl
+        w-full
+        text-center
+        shadow-lg
+        ring-4 ring-blue-400
+        transition
+        duration-700
+        ease-in-out
+        hover:shadow-[0_0_60px_20px_rgba(96,165,250,0.7)]
+        z-10
+      "
         style={{ minHeight: boxHeight }}
       >
-        <h1 className="text-5xl font-bold mb-4 text-blue-900 drop-shadow-md">Welcome to QuickPoll</h1>
-        <p className="text-lg text-blue-900 mb-10 max-w-xl drop-shadow-sm">
+        <h1 className="text-3xl sm:text-5xl font-bold mb-4 text-blue-900 drop-shadow-md">Welcome to QuickPoll</h1>
+        <p className="text-base sm:text-lg text-blue-900 mb-10 max-w-xl mx-auto drop-shadow-sm">
           QuickPoll is a real-time polling application. Create polls, share them, and view results instantly.
           No signup needed for participants!
         </p>
 
         {/* Buttons with equal width */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <button
             onClick={() => navigate("/participant")}
             className="flex-1 bg-blue-700 text-white px-6 py-3 rounded hover:bg-blue-800 transition"

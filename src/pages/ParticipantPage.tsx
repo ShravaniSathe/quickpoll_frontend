@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "../api";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useRef } from "react";
 
 interface Option {
   text: string;
@@ -23,15 +25,44 @@ export default function ParticipantPage() {
   const [votedPollId, setVotedPollId] = useState<string | null>(null);
   const [loadingVote, setLoadingVote] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const pollIdFromUrl = queryParams.get("pollId");
+
+  const pollRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [copiedPollId, setCopiedPollId] = useState<string | null>(null);
+
+  const copyLinkToClipboard = (pollId: string) => {
+    const link = `${window.location.origin}/participant?pollId=${pollId}`;
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedPollId(pollId);
+      setTimeout(() => setCopiedPollId(null), 2000);
+    });
+  };
+
 
   useEffect(() => {
     axios.get("/api/polls")
       .then(res => {
         const activePolls = res.data.filter((poll: Poll) => poll.isActive);
         setPolls(activePolls);
+
+        // If URL has pollId, set selectedPollId after data is set
+        if (pollIdFromUrl) {
+          setTimeout(() => {
+            setSelectedPollId(pollIdFromUrl);
+
+            // Scroll to the poll after a slight delay
+            const targetRef = pollRefs.current[pollIdFromUrl];
+            if (targetRef) {
+              targetRef.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }, 100); // Slight delay to ensure DOM is rendered
+        }
       })
       .catch(err => console.error("Error fetching polls:", err));
   }, []);
+
 
   const castVote = () => {
     if (!selectedPollId || selectedOptionIndex === null) return;
@@ -60,17 +91,38 @@ export default function ParticipantPage() {
         {polls.map(poll => (
           <div
             key={poll._id}
-            className="bg-gradient-to-r from-blue-300 to-gray-400 rounded-3xl p-6 shadow transition"
+            ref={(el) => (pollRefs.current[poll._id] = el)}
+            className={`bg-gradient-to-r from-blue-300 to-gray-400 rounded-3xl p-6 shadow transition relative 
+    ${selectedPollId === poll._id ? "ring-4 ring-yellow-400 animate-pulse" : ""}
+  `}
           >
-            <h3
-              className="text-xl font-semibold text-blue-900 cursor-pointer"
-              onClick={() => {
-                setSelectedPollId(prev => (prev === poll._id ? null : poll._id));
-                setSelectedOptionIndex(null);
-              }}
-            >
-              {poll.question}
-            </h3>
+            <div className="flex justify-between items-center">
+              <h3
+                className="text-xl font-semibold text-blue-900 cursor-pointer"
+                onClick={() => {
+                  setSelectedPollId(prev => (prev === poll._id ? null : poll._id));
+                  setSelectedOptionIndex(null);
+                }}
+              >
+                {poll.question}
+              </h3>
+
+              {/* Copy Icon */}
+              <button
+                onClick={() => copyLinkToClipboard(poll._id)}
+                title="Copy poll link"
+                className="text-sm text-blue-900 bg-white rounded px-2 py-1 hover:bg-blue-100 border ml-4"
+              >
+                📋
+              </button>
+            </div>
+
+            {/* Show "Copied!" confirmation */}
+            {copiedPollId === poll._id && (
+              <div className="absolute top-2 right-12 text-green-700 text-xs font-semibold">
+                Copied!
+              </div>
+            )}
 
             {selectedPollId === poll._id && (
               <div className="mt-4 space-y-3">
@@ -143,6 +195,38 @@ export default function ParticipantPage() {
         🗳️
       </button>
 
+      <button
+        onClick={() => navigate("/")}
+        className="
+    fixed 
+    left-1/2 
+    bottom-6 
+    transform 
+    -translate-x-1/2 
+
+    md:top-8 
+    md:left-8 
+    md:bottom-8
+    md:transform-none
+
+    bg-blue-600 
+    hover:bg-blue-700 
+    text-white 
+    rounded-full 
+    w-16 
+    h-16 
+    flex 
+    items-center 
+    justify-center 
+    text-xl 
+    font-bold 
+    shadow-lg 
+    transition
+  "
+        title="Go to Home"
+      >
+        🏠
+      </button>
     </div>
   );
 }
